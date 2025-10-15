@@ -1,0 +1,84 @@
+<div class="wrap" style="padding:20px;">
+  <header class="brand" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+    <h1 style="margin:0;font-size:22px;">Xjobs — CV Scanner</h1>
+  </header>
+
+  <section class="panel" style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:12px;">
+    <h2 style="margin:0 0 8px 0;font-size:16px;">Upload files</h2>
+    <p *ngIf="lastMessage" style="margin:4px 0 10px 0;color:#374151;">{{ lastMessage }}</p>
+
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input
+        type="file"
+        multiple
+        accept=".csv,.tsv,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        (change)="onFilesSelected($event)"
+      />
+      <button type="button" (click)="showPaste = true">Paste rows</button>
+      <label style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <span>Source label</span>
+        <input type="text" [(ngModel)]="sourceLabel" style="padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;min-width:160px;" />
+      </label>
+    </div>
+  </section>
+
+  <section class="panel" style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+      <h2 style="margin:0;font-size:16px;">Categorías</h2>
+      <button type="button" (click)="clearFilter()" [disabled]="!selectedCategoria">Clear filter</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <button *ngFor="let cat of CANON" type="button"
+              (click)="toggleFilter(cat)"
+              [ngStyle]="{ backgroundColor: (selectedCategoria === cat ? '#111827' : '#f3f4f6'), color: (selectedCategoria === cat ? '#fff' : '#111827') }"
+              style="border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;cursor:pointer;">
+        {{ cat }}
+      </button>
+    </div>
+
+    <div style="height:280px;position:relative;border:1px dashed #e5e7eb;border-radius:8px;padding:6px;">
+      <canvas #barChart></canvas>
+    </div>
+  </section>
+
+  <section class="panel" style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:12px;">
+    <h2 style="margin:0 0 8px 0;font-size:16px;">Resultados ({{ visibleRows.length }})</h2>
+    <div style="overflow:auto;border:1px solid #e5e7eb;border-radius:8px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead style="background:#f9fafb;">
+          <tr><th>Nombre</th><th>Teléfono</th><th>Email</th><th>Dirección</th><th>Categoría</th><th>Fuente</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of visibleRows">
+            <td>{{ r.nombre || '-' }}</td><td>{{ r.telefono || '-' }}</td><td>{{ r.email || '-' }}</td>
+            <td>{{ r.direccion || '-' }}</td><td>{{ r.categoria_laboral || 'otro' }}</td><td>{{ r.fuente || 'Manual' }}</td>
+          </tr>
+          <tr *ngIf="!visibleRows.length"><td colspan="6" style="text-align:center;color:#6b7280;">No hay filas para mostrar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" *ngIf="unparsedFiles.length"
+           style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:12px 0;">
+    <h2 style="margin:0 0 8px 0;font-size:16px;">Archivos sin parsear ({{ unparsedFiles.length }})</h2>
+    <ul style="margin:0;padding-left:18px;">
+      <li *ngFor="let f of unparsedFiles">
+        {{ f.name }} <span style="color:#6b7280;">({{ f.kind }})</span>
+        <span *ngIf="f.reason" style="color:#9ca3af;">– {{ f.reason }}</span>
+      </li>
+    </ul>
+  </section>
+
+  <div *ngIf="showPaste" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:50;">
+    <div style="background:white;max-width:720px;width:92vw;border-radius:12px;padding:16px;">
+      <h3 style="margin:0 0 8px 0;">Paste CSV/TSV or one name per line</h3>
+      <textarea [(ngModel)]="pasteText" rows="10" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-family:monospace;"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" (click)="closePaste()">Cancel</button>
+        <button type="button" (click)="parsePasted()">Parse & Add</button>
+      </div>
+    </div>
+  </div>
+</div>
