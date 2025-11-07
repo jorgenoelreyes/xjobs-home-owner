@@ -1,14 +1,15 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { AppComponent } from './app.component';
-import { UploadCvsComponent } from './components/upload-cvs/upload-cvs.component';
+import { NgModule } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
+import { FormsModule } from "@angular/forms";
+import { HttpClientModule } from "@angular/common/http";
+import { NgChartsModule } from "ng2-charts";
+import { AppComponent } from "./app.component"; // standalone
+import { UploadCvsComponent } from "./components/upload-cvs/upload-cvs.component";
 
 @NgModule({
-  declarations: [AppComponent, UploadCvsComponent],
-  imports: [BrowserModule, CommonModule, FormsModule],
+  declarations: [UploadCvsComponent],
+  imports: [BrowserModule, FormsModule, HttpClientModule, NgChartsModule, AppComponent],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

@@ -1,0 +1,99 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { NgChartsModule } from 'ng2-charts';
+import { ChartConfiguration, ChartType } from 'chart.js';
+import * as Papa from 'papaparse';
+
+type ResumeRow = {
+  firstName: string;
+  lastName?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  profession?: string;
+  trade?: string;
+  skills?: string;
+  industry?: string;
+  geolocation?: string;
+  source?: string;
+};
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, HttpClientModule, NgChartsModule],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'XJobs – Upload & Browse Workers';
+  rows: ResumeRow[] = [];
+  filtered: ResumeRow[] = [];
+  activeFilter: string | null = null;
+  total = 0;
+
+  public barChartType: ChartType = 'bar';
+  public barChartLabels: string[] = [];
+  public barChartData: any[] = [{ data: [], label: 'Workers' }];
+  public barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555' } },
+      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555' } }
+    }
+  };
+
+  constructor(private http: HttpClient) {}
+
+  clearAll() { this.rows = []; this.filtered = []; this.total = 0; this.refreshChart(); }
+
+  refreshChart() {
+    const counts: Record<string, number> = {};
+    for (const r of this.filtered) {
+      const cat = (r.trade || r.profession || 'unknown').toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    const entries = Object.entries(counts).sort((a,b)=>a[0].localeCompare(b[0]));
+    this.barChartLabels = entries.map(e => e[0]);
+    const values = entries.map(e => e[1]);
+    const max = Math.max(...values, 5);
+    this.barChartData = [{ data: values, label: 'Workers' }];
+// patched: y-scale max set elsewhere
+    }
+  }
+
+  async onPickFiles(ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    const files = Array.from(input.files || []);
+    if (!files.length) return;
+    const mode = confirm('Add to current batch? Click Cancel to replace.') ? 'add' : 'replace';
+    if (mode === 'replace') this.clearAll();
+
+    for (const f of files) {
+      const text = await f.text();
+      const parsed = Papa.parse(text, { header: true }).data as any[];
+      for (const row of parsed) {
+        const r: ResumeRow = {
+          firstName: row['First Name'] || row['Name']?.split(' ')[0] || '',
+          lastName: row['Last Name'] || row['Name']?.split(' ')[1] || '',
+          address: row['Address'] || '',
+          email: row['Email'] || '',
+          phone: row['Phone'] || '',
+          profession: row['Profession'] || '',
+          trade: row['Trade'] || '',
+          skills: row['Skills'] || '',
+          industry: row['Industry'] || '',
+          geolocation: row['Location'] || ''
+        };
+        this.rows.push(r);
+      }
+    }
+
+    this.filtered = [...this.rows];
+    this.total = this.rows.length;
+    this.refreshChart();
+  }
+}

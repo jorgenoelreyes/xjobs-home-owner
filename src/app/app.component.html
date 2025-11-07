@@ -1,1 +1,64 @@
-<app-upload-cvs></app-upload-cvs>
+<div style="padding:16px">
+  <h1>XJobs — Upload & Browse Workers</h1>
+
+  <section style="margin-bottom:12px;">
+    <label style="font-weight:600;">Upload Files</label><br />
+    <input type="file" multiple (change)="onPickFiles($event)" />
+    <div style="font-size:12px;color:#6b7280;margin-top:4px;">
+      CSV parsed locally. PDFs/DOCs go to backend <code>/parse</code>.
+    </div>
+    <div style="margin-top:8px;">
+      <button (click)="clearAll()">Clear All</button>
+      <button (click)="geocodeMissing()">Geocode Missing (with random jitter)</button>
+      <span style="margin-left:12px;font-size:12px;color:#6b7280;">Total: {{ total }}</span>
+    </div>
+  </section>
+
+  <section style="max-width:780px;margin:8px 0 16px;">
+    <canvas baseChart
+            [type]="barChartType"
+            [data]="{ labels: barChartLabels, datasets: barChartData }"
+            [options]="barChartOptions">
+    </canvas>
+  </section>
+
+  <h3>Results</h3>
+  <table style="margin-top:8px;border-collapse:collapse;width:100%;font-size:14px;">
+    <thead>
+      <tr>
+        <th>Photo</th><th>Name</th><th>Trade</th><th>Phone</th><th>Email</th>
+        <th>Address</th><th>City</th><th>State</th><th>Country</th>
+        <th>Lat</th><th>Lng</th><th>Skills</th><th>Exp (yrs)</th>
+        <th>Certifications</th><th>Languages</th><th>Availability</th>
+        <th>Rate</th><th>Education</th><th>License</th><th>Vehicle</th>
+        <th>Work Eligibility</th><th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of filtered">
+        <td>—</td>
+        <td>{{r.name}}</td>
+        <td>{{r.category}}</td>
+        <td>{{r.phone || "—"}}</td>
+        <td>{{r.email || "—"}}</td>
+        <td>{{r.address || "—"}}</td>
+        <td>{{r.city || "—"}}</td>
+        <td>{{r.state || "—"}}</td>
+        <td>{{r.country || "—"}}</td>
+        <td>{{r.lat ?? "—"}}</td>
+        <td>{{r.lng ?? "—"}}</td>
+        <td>{{r.skills || "—"}}</td>
+        <td>{{r.exp ?? "—"}}</td>
+        <td>{{r.certs || "—"}}</td>
+        <td>{{r.langs || "—"}}</td>
+        <td>{{r.availability || "—"}}</td>
+        <td>{{r.rate || "—"}}</td>
+        <td>{{r.education || "—"}}</td>
+        <td>{{r.license || "—"}}</td>
+        <td>{{r.vehicle || "—"}}</td>
+        <td>{{r.eligibility || "—"}}</td>
+        <td>{{r.source || "—"}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
