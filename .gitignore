@@ -1,5 +1,14 @@
-node_modules/
+# Angular and build artifacts
+.angular/
 dist/
-.backups/
+
+# Node modules
+node_modules/
+
+# IDE / OS files
 *.log
+.DS_Store
+
+# Env / backups
 .env
+.backups/
